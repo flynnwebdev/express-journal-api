@@ -1,7 +1,12 @@
 import express from 'express'
 import mongoose from 'mongoose'
 
-const categories = ['Food', 'Gaming', 'Coding', 'Other']
+const categories = [
+  { name: 'Food' },
+  { name: 'Gaming' },
+  { name: 'Coding' },
+  { name: 'Other' }
+]
 
 const entries = [
   { category: "Food", content: "Pizza is yummy!" },
@@ -30,14 +35,19 @@ app.get('/', (request, response) => response.send({ info: 'Journal API!' }))
 
 app.get('/categories', (req, res) => res.send(categories))
 
-app.get('/entries', (req, res) => res.send(entries))
+app.get('/entries', async (req, res) => res.send(await EntryModel.find()))
 
-app.get('/entries/:id', (req, res) => {
-  const entry = entries[req.params.id]
-  if (entry) {
-    res.send(entry)
-  } else {
-    res.status(404).send({ error: 'Entry not found' })
+app.get('/entries/:id', async (req, res) => {
+  try {
+    const entry = await EntryModel.findById(req.params.id)
+    if (entry) {
+      res.send(entry)
+    } else {
+      res.status(404).send({ error: 'Entry not found' })
+    }
+  }
+  catch (err) {
+    res.status(500).send({ error: err.message })
   }
 })
 
