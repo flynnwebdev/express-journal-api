@@ -19,18 +19,31 @@ mongoose.connect('mongodb+srv://cademo:euYDsiiwCfuO77xN@cluster0.efrnd.mongodb.n
   .catch(err => console.error(err))
 
 const entrySchema = new mongoose.Schema({
-  category: { type: String, required: true },
+  category: { type: mongoose.ObjectId, ref: 'Category' },
   content: { type: String, required: true }
 })
 
 const EntryModel = mongoose.model('Entry', entrySchema)
 
 const categorySchema = new mongoose.Schema({
-  name: { type: String, required: true }
+  name: { type: String, required: true, unique: true },
 })
 
 const CategoryModel = mongoose.model('Category', categorySchema)
 
+// CategoryModel.create({
+//   name: 'Foo',
+//   entries: [
+//     { content: 'Bar' },
+//     { content: 'Bat'}
+//   ]
+// })
+
+// async function addEntry() {
+//   const theCat = await CategoryModel.findOne({ name: 'Coding' })
+//   EntryModel.create({ content: 'Testing category ref', category: theCat._id })
+// }
+// addEntry()
 
 const app = express()
 const port = 4001
@@ -59,8 +72,13 @@ app.get('/entries/:id', async (req, res) => {
 
 app.post('/entries', async (req, res) => {
   try {
-    const insertedEntry = await EntryModel.create(req.body)
-    res.status(201).send(insertedEntry)
+    const theCat = await CategoryModel.findOne({ name: req.body.category })
+    if (theCat) {
+      const insertedEntry = await EntryModel.create({ content: req.body.content, category: theCat._id })
+      res.status(201).send(insertedEntry)
+    } else {
+      res.status(400).send({ error: 'Category not found' })
+    }
   }
   catch (err) {
     res.status(500).send({ error: err.message })
@@ -69,7 +87,7 @@ app.post('/entries', async (req, res) => {
 
 app.put('/entries/:id', async (req, res) => {
   try {
-    const entry = await EntryModel.findByIdAndUpdate(req.params.id, req.body, { new: true})
+    const entry = await EntryModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
     if (entry) {
       res.send(entry)
     } else {
