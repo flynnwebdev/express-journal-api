@@ -1,5 +1,10 @@
 import mongoose from 'mongoose'
 
+async function dbClose() {
+  await mongoose.connection.close()
+  console.log('Database disconnected')
+}
+
 mongoose.connect('mongodb+srv://cademo:euYDsiiwCfuO77xN@cluster0.efrnd.mongodb.net/journal?retryWrites=true&w=majority')
   .then(m => console.log(m.connection.readyState === 1 ? 'Mongoose connected!' : 'Mongoose failed to connect'))
   .catch(err => console.error(err))
@@ -17,4 +22,4 @@ const categorySchema = new mongoose.Schema({
 
 const CategoryModel = mongoose.model('Category', categorySchema)
 
-export { EntryModel, CategoryModel }
+export { EntryModel, CategoryModel, dbClose }

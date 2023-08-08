@@ -1,4 +1,4 @@
-import { EntryModel, CategoryModel } from './db.js'
+import { EntryModel, CategoryModel, dbClose } from './db.js'
 
 const categories = [
   { name: 'Food' },
@@ -7,14 +7,20 @@ const categories = [
   { name: 'Other' }
 ]
 
+await CategoryModel.deleteMany()
+console.log('Deleted Categories')
+const cats = await CategoryModel.insertMany(categories)
+console.log('Inserted Categories')
+
 const entries = [
-  { category: "Food", content: "Pizza is yummy!" },
-  { category: "Coding", content: "Coding is fun!" },
-  { category: "Gaming", content: "Skyrim is for the Nords!" },
+  { category: cats[0], content: "Pizza is yummy!" },
+  { category: cats[2], content: "Coding is fun!" },
+  { category: cats[1], content: "Skyrim is for the Nords!" },
 ]
 
 await EntryModel.deleteMany()
-await CategoryModel.deleteMany()
+console.log('Deleted Entries')
+await EntryModel.insertMany(entries)
+console.log('Inserted Entries')
 
-await CategoryModel.insertMany(categories)
-
+dbClose()
